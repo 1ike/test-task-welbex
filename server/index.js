@@ -1,13 +1,26 @@
 import http from 'http';
 import * as pg from 'pg'
+import * as dotenv from 'dotenv'
 
 
-const { Pool } = pg.default;
+dotenv.config({ path: '../.env' });
+const {
+  DB_HOST,
+  DB_PORT,
+  DB_NAME,
+  DB_USER,
+  DB_PASSWORD,
+  SERVER_PORT,
+  PAGE_SIZE,
+} = process.env;
+
+const { default: { Pool } } = pg;
 const pool = new Pool({
-  host: 'localhost',
-  user: 'postgres',
-  password: 'pass',
-  database: 'postgres',
+  host: DB_HOST,
+  port: DB_PORT,
+  user: DB_USER,
+  password: DB_PASSWORD,
+  database: DB_NAME,
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
@@ -24,21 +37,21 @@ pool.on('error', (err, client) => {
 const server = http.createServer((req, res) => {
   const url = new URL(`${req.protocol}://${req.host}${req.url}`);
 
-  if(url.pathname !== '/api/data' || req.method !== 'GET') {
+  if (url.pathname !== '/api/data' || req.method !== 'GET') {
     res.writeHead(404);
     return res.end('404: Resource not found');
   };
 
-  ;(async () => {
+  ; (async () => {
     const client = await pool.connect()
     try {
       const page = url.searchParams.get('page') || 1;
-      const limit = url.searchParams.get('limit') || 10;
+      const limit = url.searchParams.get('limit') || PAGE_SIZE;
       const filter = url.searchParams.get('filter');
 
       const offset = (page - 1) * limit;
 
-      const { rows: data } = await client.query('SELECT * FROM test_data OFFSET $1 LIMIT $2 ' , [offset, limit])
+      const { rows: data } = await client.query('SELECT * FROM test_data OFFSET $1 LIMIT $2 ', [offset, limit])
 
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(data));
@@ -53,4 +66,6 @@ const server = http.createServer((req, res) => {
 
 });
 
-server.listen(8000);
+server.listen(SERVER_PORT, () => {
+  console.info(`Server is running on port ${SERVER_PORT}`);
+});
