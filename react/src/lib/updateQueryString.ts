@@ -2,7 +2,8 @@ interface PageParam {
   key: 'page';
   value: number;
 }
-enum OrderByParamValue {
+
+export enum OrderByParamValue {
   date = 'date',
   name = 'name',
   qty = 'qty',
@@ -12,7 +13,8 @@ interface OrderByParam {
   key: 'order_by';
   value: OrderByParamValue;
 }
-enum OrderParamValue {
+
+export enum OrderParamValue {
   ASC = 'ASC',
   DESC = 'DESC',
 }
@@ -21,8 +23,9 @@ interface OrderParam {
   value: OrderParamValue;
 }
 
+export interface QueryParams extends Array<PageParam | OrderByParam | OrderParam> {};
 
-function useQueryString(params: Array<PageParam | OrderByParam | OrderParam> = []) {
+function useQueryString(params: QueryParams = []) {
   const url = new URL(window.location.href);
   let needUpdate = true;
 

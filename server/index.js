@@ -54,7 +54,7 @@ const server = http.createServer((req, res) => {
       const page = url.searchParams.get('page') || 1;
       const limit = url.searchParams.get('limit') || PAGE_SIZE;
 
-      const orderByRaw = url.searchParams.get('order_by')?.toUpperCase();
+      const orderByRaw = url.searchParams.get('order_by')?.toLowerCase();
       const orderBy = ['id', 'date', 'name', 'qty', 'distance'].includes(orderByRaw)
         ? orderByRaw
         : 'date';

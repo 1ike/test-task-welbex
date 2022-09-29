@@ -12,4 +12,3 @@ export interface ServerResponse {
   items: Item[],
   total: number,
 };
-
