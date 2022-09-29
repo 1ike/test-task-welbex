@@ -1,6 +1,6 @@
 import http from 'http';
-import * as pg from 'pg'
-import * as dotenv from 'dotenv'
+import * as pg from 'pg';
+import * as dotenv from 'dotenv';
 
 
 dotenv.config({ path: '../.env' });
@@ -29,8 +29,8 @@ const pool = new Pool({
 // the pool will emit an error on behalf of any idle clients
 // it contains if a backend error or network partition happens
 pool.on('error', (err, client) => {
-  console.error('Unexpected error on idle client', err)
-  process.exit(-1)
+  console.error('Unexpected error on idle client', err);
+  process.exit(-1);
 })
 
 
@@ -47,7 +47,7 @@ const server = http.createServer((req, res) => {
   };
 
   ; (async () => {
-    const client = await pool.connect()
+    const client = await pool.connect();
     try {
       const page = url.searchParams.get('page') || 1;
       const limit = url.searchParams.get('limit') || PAGE_SIZE;
@@ -55,17 +55,23 @@ const server = http.createServer((req, res) => {
 
       const offset = (page - 1) * limit;
 
-      const { rows: data } = await client.query('SELECT * FROM test_data OFFSET $1 LIMIT $2 ', [offset, limit])
+      const { rows } = await client.query('SELECT *, count(*) OVER() AS page_qty FROM test_data OFFSET $1 LIMIT $2', [offset, limit]);
+
+      const pageQty = Number(rows[0]?.page_qty) || 0
+      const items = rows.map((row) => {
+        delete row.page_qty;
+        return row;
+      })
 
       res.setHeader('Access-Control-Allow-Origin', '*');
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(data));
+      res.end(JSON.stringify({ pageQty, items }));
     } catch (err) {
       res.writeHead(500);
       res.end('Server error');
-      console.error(err)
+      console.error(err);
     } finally {
-      client.release()
+      client.release();
     }
   })()
 

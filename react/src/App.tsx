@@ -7,7 +7,8 @@ import DataTable from './components/DataTable';
 
 
 function App() {
-  const [data, setData] = useState([]);
+  const [items, setItems] = useState([]);
+  const [pageQty, setPageQty] = useState(0);
   const [page, setPage] = useState();
 
 
@@ -19,7 +20,8 @@ function App() {
     })
     .then(function (response) {
       console.log(response.data);
-      setData(response.data)
+      setItems(response.data.items)
+      setPageQty(response.data.pageQty)
     })
     .catch(function (error) {
       console.log(error);
@@ -31,7 +33,7 @@ function App() {
   
   return (
     <main className="container">
-      <DataTable items={data} />
+      <DataTable items={items} />
     </main>
   );
 }
