@@ -55,17 +55,17 @@ const server = http.createServer((req, res) => {
 
       const offset = (page - 1) * limit;
 
-      const { rows } = await client.query('SELECT *, count(*) OVER() AS page_qty FROM test_data OFFSET $1 LIMIT $2', [offset, limit]);
+      const { rows } = await client.query('SELECT *, count(*) OVER() AS total FROM test_data OFFSET $1 LIMIT $2', [offset, limit]);
 
-      const pageQty = Number(rows[0]?.page_qty) || 0
+      const total = Number(rows[0]?.total) || 0
       const items = rows.map((row) => {
-        delete row.page_qty;
+        delete row.total;
         return row;
       })
 
       res.setHeader('Access-Control-Allow-Origin', '*');
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ pageQty, items }));
+      res.end(JSON.stringify({ total, items }));
     } catch (err) {
       res.writeHead(500);
       res.end('Server error');
