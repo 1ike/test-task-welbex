@@ -1,10 +1,11 @@
 import Table from 'react-bootstrap/Table';
 
+import { Items } from '../../types';
 import './DataTable.scss';
 
 
 interface Props {
-  items: any
+  items: Items,
 }
 
 function DataTable({ items }: Props) {
@@ -23,12 +24,12 @@ function DataTable({ items }: Props) {
         </tr>
       </thead>
       <tbody>
-        {items.map((item: any) => (
+        {items.map((item) => (
           <tr key={item.id}>
-            <td>{item.id}</td>
-            <td>{item.id}</td>
-            <td>{item.id}</td>
-            <td>{item.id}</td>
+            <td>{item.date}</td>
+            <td>{item.name}</td>
+            <td>{item.qty}</td>
+            <td>{item.distance}</td>
           </tr>
         ))}
       </tbody>

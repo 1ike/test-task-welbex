@@ -35,6 +35,8 @@ pool.on('error', (err, client) => {
 
 
 const server = http.createServer((req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+
   const url = new URL(`${req.protocol}://${req.host}${req.url}`);
 
   if (url.pathname !== '/api/data') {
@@ -51,11 +53,24 @@ const server = http.createServer((req, res) => {
     try {
       const page = url.searchParams.get('page') || 1;
       const limit = url.searchParams.get('limit') || PAGE_SIZE;
-      const filter = url.searchParams.get('filter');
+
+      const orderByRaw = url.searchParams.get('order_by')?.toUpperCase();
+      const orderBy = ['id', 'date', 'name', 'qty', 'distance'].includes(orderByRaw)
+        ? orderByRaw
+        : 'date';
+      const orderRaw = url.searchParams.get('order')?.toUpperCase();
+      const order = ['ASC', 'DESC'].includes(orderRaw)
+        ? orderRaw
+        : 'DESC';
 
       const offset = (page - 1) * limit;
 
-      const { rows } = await client.query('SELECT *, count(*) OVER() AS total FROM test_data OFFSET $1 LIMIT $2', [offset, limit]);
+      const values = [offset, limit];
+      const { rows } = await client.query(`
+        SELECT *, count(*) OVER() AS total FROM test_data
+        ORDER BY ${orderBy} ${order}
+        OFFSET $1 LIMIT $2
+      `, values);
 
       const total = Number(rows[0]?.total) || 0
       const items = rows.map((row) => {
@@ -63,7 +78,6 @@ const server = http.createServer((req, res) => {
         return row;
       })
 
-      res.setHeader('Access-Control-Allow-Origin', '*');
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ total, items }));
     } catch (err) {

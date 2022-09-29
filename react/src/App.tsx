@@ -6,6 +6,7 @@ import { SERVER_HOST, SERVER_PORT, PAGE_SIZE } from './config';
 import DataTable from './components/DataTable';
 import { Items, ServerResponse } from './types';
 import Pagination from './components/Pagination';
+import updateQueryString from './lib/updateQueryString';
 
 
 function App() {
@@ -13,8 +14,8 @@ function App() {
   const [pageQty, setPageQty] = useState(0);
   const [page, setPage] = useState(1);
 
-
   useEffect(() => {
+    updateQueryString([{ key: 'page', value: page }])
     axios.get<ServerResponse>(`http://${SERVER_HOST}:${SERVER_PORT}/api/data`, {
       params: {
         page,
@@ -32,7 +33,7 @@ function App() {
       // always executed
     });
   }, [page])
-  
+
   return (
     <main className="container">
       <DataTable items={items} />
