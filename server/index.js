@@ -37,9 +37,13 @@ pool.on('error', (err, client) => {
 const server = http.createServer((req, res) => {
   const url = new URL(`${req.protocol}://${req.host}${req.url}`);
 
-  if (url.pathname !== '/api/data' || req.method !== 'GET') {
+  if (url.pathname !== '/api/data') {
     res.writeHead(404);
     return res.end('404: Resource not found');
+  };
+  if (req.method !== 'GET') {
+    res.writeHead(405);
+    return res.end('405: Method Not Allowed');
   };
 
   ; (async () => {
@@ -53,6 +57,7 @@ const server = http.createServer((req, res) => {
 
       const { rows: data } = await client.query('SELECT * FROM test_data OFFSET $1 LIMIT $2 ', [offset, limit])
 
+      res.setHeader('Access-Control-Allow-Origin', '*');
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(data));
     } catch (err) {
