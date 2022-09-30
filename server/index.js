@@ -30,9 +30,14 @@ const pool = new Pool({
 // it contains if a backend error or network partition happens
 pool.on('error', (err, client) => {
   console.error('Unexpected error on idle client', err);
-  process.exit(-1);
 })
 
+const condition = {
+  eq: '=',
+  gt: '>',
+  lt: '<',
+  like: 'LIKE',
+};
 
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -54,6 +59,19 @@ const server = http.createServer((req, res) => {
       const page = url.searchParams.get('page') || 1;
       const limit = url.searchParams.get('limit') || PAGE_SIZE;
 
+
+      const filterByRaw = url.searchParams.get('filter_by');
+      const filterBy = ['name', 'qty', 'distance'].includes(filterByRaw)
+        ? filterByRaw
+        : undefined;
+      const filterConditionRaw = url.searchParams.get('filter_condition');
+      const filterCondition = ['eq', 'gt', 'lt', 'like'].includes(filterConditionRaw)
+        ? condition[filterConditionRaw]
+        : undefined;
+      const filterValue = url.searchParams.get('filter_value');
+
+      const hasFilter = filterBy && filterCondition && filterValue;
+
       const orderByRaw = url.searchParams.get('order_by')?.toLowerCase();
       const orderBy = ['id', 'date', 'name', 'qty', 'distance'].includes(orderByRaw)
         ? orderByRaw
@@ -66,8 +84,13 @@ const server = http.createServer((req, res) => {
       const offset = (page - 1) * limit;
 
       const values = [offset, limit];
+      if (hasFilter) {
+        values.push(filterCondition === condition.like ? `%${filterValue}%` : filterValue);
+      }
+
       const { rows } = await client.query(`
         SELECT *, count(*) OVER() AS total FROM test_data
+        ${hasFilter ? ` WHERE ${filterBy} ${filterCondition} $3 ` : ''}
         ORDER BY ${orderBy} ${order}
         OFFSET $1 LIMIT $2
       `, values);
