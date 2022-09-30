@@ -15,9 +15,9 @@ function Pagination({ pageQty, page, setPage }: Props) {
   for (let number = 1; number <= pageQty; number++) {
     buttons.push(
       <BootstrapPagination.Item
-      key={number}
-      active={number === page}
-      onClick={() => setPage(number)}
+        key={number}
+        active={number === page}
+        onClick={() => setPage(number)}
       >
         {number}
       </BootstrapPagination.Item>,

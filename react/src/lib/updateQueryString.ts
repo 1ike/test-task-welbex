@@ -23,26 +23,46 @@ interface OrderParam {
   value: OrderParamValue;
 }
 
-export interface QueryParams extends Array<PageParam | OrderByParam | OrderParam> {};
+export type FilterByParamValue = Exclude<OrderByParamValue, OrderByParamValue.date>
+interface FilterByParam {
+  key: 'filter_by';
+  value: FilterByParamValue;
+}
+
+export enum FilterConditionParamValue {
+  eq = 'eq',
+  gt = 'gt',
+  lt = 'lt',
+  like = 'like',
+}
+interface FilterConditionParam {
+  key: 'filter_condition';
+  value: FilterConditionParamValue;
+}
+
+interface FilterValueParam {
+  key: 'filter_value';
+  value: string;
+}
+
+
+export interface QueryParams extends Array<
+  PageParam | OrderByParam | OrderParam | FilterByParam | FilterConditionParam | FilterValueParam
+> { };
 
 function useQueryString(params: QueryParams = []) {
   const url = new URL(window.location.href);
-  let needUpdate = true;
 
   params.forEach(({ key, value }) => {
     const pageParamName = 'page';
-    if ( key === pageParamName && value === 1) {
-      if (url.searchParams.has(pageParamName)) {
-        url.searchParams.delete(pageParamName)
-      } else {
-        needUpdate = false;
-      }
+    if (key === pageParamName && value === 1 && url.searchParams.has(pageParamName)) {
+      url.searchParams.delete(pageParamName)
     } else {
       url.searchParams.set(key, String(value));
     }
   })
 
-  if (needUpdate) window.history.pushState(null, '', url);
+  window.history.pushState(null, '', url);
 }
 
 export default useQueryString;
