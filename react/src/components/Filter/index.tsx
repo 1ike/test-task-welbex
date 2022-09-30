@@ -22,6 +22,12 @@ const placeholder: { [key in FilterByParamValue]: string } = {
 
 const validateRequired = (val: string | undefined) => Boolean(val?.trim());
 
+const commonConditions = [
+  [FilterConditionParamValue.eq, '='],
+  [FilterConditionParamValue.gt, '>'],
+  [FilterConditionParamValue.lt, '<'],
+];
+
 const filterData = {
   field: {
     values: [
@@ -37,12 +43,14 @@ const filterData = {
     }
   },
   condition: {
-    values: [
-      [FilterConditionParamValue.eq, '='],
-      [FilterConditionParamValue.gt, '>'],
-      [FilterConditionParamValue.lt, '<'],
-      [FilterConditionParamValue.like, 'содержит'],
-    ],
+    values: {
+      [OrderByParamValue.name]: [
+        ...commonConditions,
+        [FilterConditionParamValue.like, 'содержит']
+      ],
+      [OrderByParamValue.qty]: commonConditions,
+      [OrderByParamValue.distance]: commonConditions,
+    },
     validate: {
       required: {
         error: 'Необходимо заполнить',
@@ -156,7 +164,7 @@ function Filter({ filter, setFilter }: Props) {
 
   console.log('errors = ', errors);
   const renderEmptyOption = (filter: FilterState | null) => {
-    return filter === null && <option disabled value="DEFAULT"> --- </option>
+    return filter === null && <option disabled value="DEFAULT"> ----- </option>
   }
 
   const renderErrors = (column: keyof FilterState) => (
@@ -190,7 +198,7 @@ function Filter({ filter, setFilter }: Props) {
             defaultValue={'DEFAULT'}
           >
             {renderEmptyOption(filter)}
-            {filterData.condition.values.map((val) => (
+            {field && filterData.condition.values[field].map((val) => (
               <option key={val[0]} value={val[0]}>{val[1]}</option>
             ))}
           </Form.Select>
