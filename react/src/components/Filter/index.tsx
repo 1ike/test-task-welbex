@@ -182,6 +182,10 @@ function Filter({ filter, setFilter }: Props) {
     </Form.Control.Feedback>
   )
 
+  console.log('filter = ', filter);
+  console.log('field = ', field);
+  console.log('condition = ', condition);
+  console.log('value = ', value);
   return (
     <Form className="mt-3 mb-5" noValidate onSubmit={handleSubmit} ref={formElement}>
       <Row>
@@ -191,7 +195,7 @@ function Filter({ filter, setFilter }: Props) {
             onChange={onChange<FilterState['field']>(setField)}
             isInvalid={validated && errors.field.length > 0}
             defaultValue={'DEFAULT'}
-            value={field}
+            value={field || 'DEFAULT'}
           >
             {renderEmptyOption(filter)}
             {filterData.field.values.map((val) => (
@@ -206,7 +210,7 @@ function Filter({ filter, setFilter }: Props) {
             onChange={onChange<FilterState['condition']>(setCondition)}
             isInvalid={validated && errors.condition.length > 0}
             defaultValue={'DEFAULT'}
-            value={condition}
+            value={condition || 'DEFAULT'}
           >
             {renderEmptyOption(filter)}
             {(field ? filterData.condition.values[field] : commonConditions).map((val) => (
