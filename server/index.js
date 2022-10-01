@@ -3,15 +3,15 @@ import * as pg from 'pg';
 import * as dotenv from 'dotenv';
 
 
-dotenv.config({ path: '../.env' });
+dotenv.config({ path: '../react/.env' });
 const {
   DB_HOST,
   DB_PORT,
   DB_NAME,
   DB_USER,
   DB_PASSWORD,
-  SERVER_PORT,
-  PAGE_SIZE,
+  REACT_APP_SERVER_PORT: SERVER_PORT,
+  REACT_APP_PAGE_SIZE: PAGE_SIZE,
 } = process.env;
 
 const { default: { Pool } } = pg;
