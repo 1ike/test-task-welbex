@@ -1,7 +1,5 @@
 import BootstrapPagination from 'react-bootstrap/Pagination';
 
-import './Pagination.scss';
-
 
 interface Props {
   pageQty: number,
@@ -10,7 +8,6 @@ interface Props {
 }
 
 function Pagination({ pageQty, page, setPage }: Props) {
-
   let buttons = [];
   for (let number = 1; number <= pageQty; number++) {
     buttons.push(

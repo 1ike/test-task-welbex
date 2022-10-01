@@ -4,8 +4,7 @@ import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
-import './Filter.scss';
-import { FilterByParamValue, OrderByParamValue, FilterConditionParamValue } from '../../lib/updateQueryString';
+import { FilterByParamValue, OrderByParamValue, FilterConditionParamValue } from '../lib/updateQueryString';
 
 
 export interface FilterState {
@@ -182,10 +181,7 @@ function Filter({ filter, setFilter }: Props) {
     </Form.Control.Feedback>
   )
 
-  console.log('filter = ', filter);
-  console.log('field = ', field);
-  console.log('condition = ', condition);
-  console.log('value = ', value);
+
   return (
     <Form className="mt-3 mb-5" noValidate onSubmit={handleSubmit} ref={formElement}>
       <Row>

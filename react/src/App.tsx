@@ -29,7 +29,7 @@ function App() {
 
   const [loading, setLoading] = useState(false);
 
-  console.log('filter = ', filter);
+
   useEffect(() => {
     const queryParams: QueryParams = [{ key: 'page', value: page }];
     if (orderBy) queryParams.push({ key: 'order_by', value: orderBy });

@@ -1,8 +1,7 @@
 import Table from 'react-bootstrap/Table';
 
-import { OrderByParamValue, OrderParamValue } from '../../lib/updateQueryString';
-import { Items } from '../../types';
-import './DataTable.scss';
+import { OrderByParamValue, OrderParamValue } from '../lib/updateQueryString';
+import { Items } from '../types';
 
 
 type SetOrderCallback = (order: OrderParamValue | null) => OrderParamValue;
