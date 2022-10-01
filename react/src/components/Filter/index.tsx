@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useRef, useState } from 'react';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
@@ -87,7 +87,7 @@ const filterData = {
 
 interface Props {
   filter: FilterState | null,
-  setFilter(filter: FilterState): void,
+  setFilter(filter: FilterState | null): void,
 }
 
 
@@ -103,10 +103,20 @@ function Filter({ filter, setFilter }: Props) {
   const [condition, setCondition] = useState(filter?.condition);
   const [value, setValue] = useState(filter?.value);
 
+  const formElement = useRef(null);
+
   const onChange = <S,>(setter: (state: S) => void) =>
     (event: ChangeEvent<HTMLSelectElement>) => setter(event.target.value as S);
 
   const onChangeValueField = (event: ChangeEvent<HTMLInputElement>) => setValue(event.target.value);
+
+  const resetFilter = () => {
+    setFilter(null);
+    setField(undefined);
+    setCondition(undefined);
+    setValue(undefined);
+    formElement.current && (formElement.current as HTMLFormElement).reset();
+  }
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -162,7 +172,6 @@ function Filter({ filter, setFilter }: Props) {
     }
   };
 
-  console.log('errors = ', errors);
   const renderEmptyOption = (filter: FilterState | null) => {
     return filter === null && <option disabled value="DEFAULT"> ----- </option>
   }
@@ -174,7 +183,7 @@ function Filter({ filter, setFilter }: Props) {
   )
 
   return (
-    <Form className="mt-3 mb-5" noValidate onSubmit={handleSubmit} >
+    <Form className="mt-3 mb-5" noValidate onSubmit={handleSubmit} ref={formElement}>
       <Row>
         <Form.Group className="mb-3" as={Col} >
           <Form.Label>Фильтр по колонке</Form.Label>
@@ -182,6 +191,7 @@ function Filter({ filter, setFilter }: Props) {
             onChange={onChange<FilterState['field']>(setField)}
             isInvalid={validated && errors.field.length > 0}
             defaultValue={'DEFAULT'}
+            value={field}
           >
             {renderEmptyOption(filter)}
             {filterData.field.values.map((val) => (
@@ -196,9 +206,10 @@ function Filter({ filter, setFilter }: Props) {
             onChange={onChange<FilterState['condition']>(setCondition)}
             isInvalid={validated && errors.condition.length > 0}
             defaultValue={'DEFAULT'}
+            value={condition}
           >
             {renderEmptyOption(filter)}
-            {field && filterData.condition.values[field].map((val) => (
+            {(field ? filterData.condition.values[field] : commonConditions).map((val) => (
               <option key={val[0]} value={val[0]}>{val[1]}</option>
             ))}
           </Form.Select>
@@ -210,12 +221,16 @@ function Filter({ filter, setFilter }: Props) {
             placeholder={field && placeholder[field]}
             isInvalid={validated && errors.value.length > 0}
             onChange={onChangeValueField}
+            value={value || ''}
           />
           {renderErrors('value')}
         </Form.Group>
       </Row>
       <Button variant="primary" type="submit">
         Отфильтровать
+      </Button>
+      <Button variant="outline-secondary" type="button" className="ms-4" onClick={resetFilter}>
+        Сбросить фильтр
       </Button>
     </Form>
   );
