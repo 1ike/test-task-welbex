@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import Spinner from 'react-bootstrap/Spinner';
 
 import './App.scss';
 import { SERVER_HOST, SERVER_PORT, PAGE_SIZE } from './config';
@@ -26,8 +27,9 @@ function App() {
 
   const [filter, setFilter] = useState<FilterState | null>(null);
 
+  const [loading, setLoading] = useState(false);
 
-console.log('filter = ', filter);
+  console.log('filter = ', filter);
   useEffect(() => {
     const queryParams: QueryParams = [{ key: 'page', value: page }];
     if (orderBy) queryParams.push({ key: 'order_by', value: orderBy });
@@ -39,7 +41,8 @@ console.log('filter = ', filter);
     }
     updateQueryString(queryParams);
 
-    if(abortController) abortController.abort();
+    setLoading(true);
+    if (abortController) abortController.abort();
     abortController = new AbortController();
     axios.get<ServerResponse>(`http://${SERVER_HOST}:${SERVER_PORT}/api/data`, {
       params: {
@@ -61,6 +64,7 @@ console.log('filter = ', filter);
       })
       .then(function () {
         abortController = null;
+        setLoading(false);
       });
   }, [page, orderBy, order, filter]);
 
@@ -75,6 +79,13 @@ console.log('filter = ', filter);
         setOrder={setOrder}
       />
       <Pagination pageQty={pageQty} page={page} setPage={setPage} />
+      {loading && (
+        <div className="spinner-container">
+          <Spinner animation="border" role="status" variant="primary">
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
+        </div>
+      )}
     </main>
   );
 }
