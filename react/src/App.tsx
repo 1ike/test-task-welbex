@@ -11,23 +11,43 @@ import { Items, ServerResponse } from './types';
 import Pagination from './components/Pagination';
 import
 updateQueryString,
-{ OrderByParamValue, OrderParamValue, QueryParams }
+{ FilterByParamValue,
+  FilterConditionParamValue,
+OrderByParamValue, OrderParamValue, QueryParams }
   from './lib/updateQueryString';
 import Filter, { FilterState } from './components/Filter';
 
 
 let abortController: AbortController | null = null;
 
+const { searchParams } = new URL(window.location.href);
+const filterBy = searchParams.get('filter_by');
+const filterCondition = searchParams.get('filter_condition');
+const filterValue = searchParams.get('filter_value');
+
+const filterFromSearchParams = filterBy && filterCondition && filterValue
+  ? {
+    field: filterBy as FilterByParamValue,
+    condition: filterCondition as FilterConditionParamValue,
+    value: filterValue,
+  }
+  : null;
+
+
 function App() {
   const [items, setItems] = useState<Items>([]);
   const [pageQty, setPageQty] = useState(0);
 
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(Number(searchParams.get('page')) || 1);
 
-  const [orderBy, setOrderBy] = useState<OrderByParamValue | null>(null);
-  const [order, setOrder] = useState<OrderParamValue | null>(null);
+  const [orderBy, setOrderBy] = useState<OrderByParamValue | null>(
+    searchParams.get('order_by') as OrderByParamValue || null,
+  );
+  const [order, setOrder] = useState<OrderParamValue | null>(
+    searchParams.get('order') as OrderParamValue || null,
+  );
 
-  const [filter, setFilter] = useState<FilterState | null>(null);
+  const [filter, setFilter] = useState<FilterState | null>(filterFromSearchParams);
 
   const [loading, setLoading] = useState(false);
 
