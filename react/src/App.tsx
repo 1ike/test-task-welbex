@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Spinner from 'react-bootstrap/Spinner';
+import Alert from 'react-bootstrap/Alert';
+import Button from 'react-bootstrap/Button';
 
 import './App.scss';
 import { SERVER_HOST, SERVER_PORT, PAGE_SIZE } from './config';
@@ -29,6 +31,8 @@ function App() {
 
   const [loading, setLoading] = useState(false);
 
+  const [error, setError] = useState<Error | null>(null);
+
 
   useEffect(() => {
     const queryParams: QueryParams = [{ key: 'page', value: page }];
@@ -42,7 +46,7 @@ function App() {
     updateQueryString(queryParams);
 
     setLoading(true);
-    if (abortController) abortController.abort();
+    abortController?.abort();
     abortController = new AbortController();
     axios.get<ServerResponse>(`http://${SERVER_HOST}:${SERVER_PORT}/api/data`, {
       params: {
@@ -60,7 +64,10 @@ function App() {
         setPageQty(Math.ceil(response.data.total / PAGE_SIZE))
       })
       .catch(function (error) {
-        console.log(error);
+        if (error.code !== 'ERR_CANCELED') {
+          console.error(error);
+          setError(error);
+        }
       })
       .then(function () {
         abortController = null;
@@ -68,8 +75,16 @@ function App() {
       });
   }, [page, orderBy, order, filter]);
 
+  const closeError = () => setError(null);
+
   return (
     <main className="container">
+      {error && (
+        <Alert variant="danger" className="error">
+          Произошла ошибка: {error.message}
+          <Button variant="outline-dark" onClick={closeError}>Закрыть</Button>
+        </Alert>
+      )}
       <Filter filter={filter} setFilter={setFilter} />
       <DataTable
         items={items}
