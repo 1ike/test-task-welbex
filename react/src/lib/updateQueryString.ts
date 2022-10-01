@@ -51,11 +51,12 @@ export interface QueryParams extends Array<
 > { };
 
 function useQueryString(params: QueryParams = []) {
-  const url = new URL(window.location.href);
+  const { location } = window;
+  const url = new URL([location.protocol, '//', location.host, location.pathname].join(''));
 
   params.forEach(({ key, value }) => {
     const pageParamName = 'page';
-    if (key === pageParamName && value === 1 && url.searchParams.has(pageParamName)) {
+    if (key === pageParamName && value === 1) {
       url.searchParams.delete(pageParamName)
     } else {
       url.searchParams.set(key, String(value));
