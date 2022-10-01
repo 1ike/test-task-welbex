@@ -191,7 +191,7 @@ function Filter({ filter, setFilter }: Props) {
             onChange={onChange<FilterState['field']>(setField)}
             isInvalid={validated && errors.field.length > 0}
             defaultValue={'DEFAULT'}
-            value={field}
+            value={field || 'DEFAULT'}
           >
             {renderEmptyOption(filter)}
             {filterData.field.values.map((val) => (
@@ -206,7 +206,7 @@ function Filter({ filter, setFilter }: Props) {
             onChange={onChange<FilterState['condition']>(setCondition)}
             isInvalid={validated && errors.condition.length > 0}
             defaultValue={'DEFAULT'}
-            value={condition}
+            value={condition || 'DEFAULT'}
           >
             {renderEmptyOption(filter)}
             {(field ? filterData.condition.values[field] : commonConditions).map((val) => (
