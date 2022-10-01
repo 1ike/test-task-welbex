@@ -13,6 +13,8 @@ updateQueryString,
 import Filter, { FilterState } from './components/Filter';
 
 
+let abortController: AbortController | null = null;
+
 function App() {
   const [items, setItems] = useState<Items>([]);
   const [pageQty, setPageQty] = useState(0);
@@ -23,6 +25,7 @@ function App() {
   const [order, setOrder] = useState<OrderParamValue | null>(null);
 
   const [filter, setFilter] = useState<FilterState | null>(null);
+
 
 console.log('filter = ', filter);
   useEffect(() => {
@@ -36,7 +39,8 @@ console.log('filter = ', filter);
     }
     updateQueryString(queryParams);
 
-
+    if(abortController) abortController.abort();
+    abortController = new AbortController();
     axios.get<ServerResponse>(`http://${SERVER_HOST}:${SERVER_PORT}/api/data`, {
       params: {
         page,
@@ -45,7 +49,8 @@ console.log('filter = ', filter);
         ...(filter && { filter_by: filter.field }),
         ...(filter && { filter_condition: filter.condition }),
         ...(filter && { filter_value: filter.value }),
-      }
+      },
+      signal: abortController.signal,
     })
       .then(function (response) {
         setItems(response.data.items)
@@ -55,7 +60,7 @@ console.log('filter = ', filter);
         console.log(error);
       })
       .then(function () {
-        // always executed
+        abortController = null;
       });
   }, [page, orderBy, order, filter]);
 
